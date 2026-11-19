@@ -1,0 +1,21 @@
+# Environment & Secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Raw Network Captures & Sensitive Logs
+*.pcap
+*.pcapng
+*.cap
+*.log
+
+# Local Scratch & Staging Notes
+*DRAFT*
+*PRIVATE*
+.obsidian/
+
+# OS & Editor Artifacts
+.DS_Store
+Thumbs.db
+.vscode/
