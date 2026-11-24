@@ -29,7 +29,7 @@ Welcome to my Cybersecurity Portfolio. This repository documents my practical pr
 | Course | Module Focus | Portfolio Deliverable | Status |
 | :--- | :--- | :--- | :--- |
 | **01** | Foundations of Cybersecurity | [Professional Statement (v1.0)](./01-foundations-of-cybersecurity/professional-statement.md) | Completed |
-| **02** | Play It Safe: Manage Security Risks | Security Audit & Risk Assessment Report | Planned |
+| **02** | Play It Safe: Manage Security Risks | [Security Audit & Risk Assessment Report](./02-manage-security-risks/security-audit-report.md) | ✅ Published |
 | **03** | Connect and Protect: Networks and Network Security | Firewall Rule Analysis & Network Incident Report | Planned |
 | **04** | Tools of the Trade: Linux and SQL | Linux Permissions Audit & SQL Security Log Queries | Planned |
 | **05** | Assets, Threats, and Vulnerabilities | Asset Classification Matrix & Vulnerability Assessment | Planned |
