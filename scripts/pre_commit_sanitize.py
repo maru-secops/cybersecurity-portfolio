@@ -83,8 +83,13 @@ def get_staged_blob(filepath: str) -> bytes:
     return res.stdout if res.returncode == 0 else b""
 
 
-def load_local_blocklist() -> list[tuple[re.Pattern, str]]:
-    """Load optional private/NDA regex patterns from a local file outside the repo."""
+def load_local_blocklist(violations: list[str]) -> list[tuple[re.Pattern, str]]:
+    """Load optional private/NDA regex patterns from a local file outside the repo.
+
+    Enforces OWASP 'Fail Securely': if OPSEC_LOCAL_BLOCKLIST is configured, a
+    missing/unreadable file or invalid regex aborts the commit instead of
+    silently continuing without local protections.
+    """
     patterns: list[tuple[re.Pattern, str]] = []
     blocklist_path = os.environ.get("OPSEC_LOCAL_BLOCKLIST", "").strip()
     if not blocklist_path:
@@ -92,14 +97,31 @@ def load_local_blocklist() -> list[tuple[re.Pattern, str]]:
 
     path = Path(blocklist_path)
     if not path.is_file():
-        print(f"[OPSEC WARN] OPSEC_LOCAL_BLOCKLIST not found: {path}", file=sys.stderr)
+        violations.append(
+            f"[FAIL-SECURELY] Configured OPSEC_LOCAL_BLOCKLIST not found: {path}"
+        )
         return patterns
 
-    for raw_line in path.read_text(encoding="utf-8").splitlines():
+    try:
+        raw_lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError as exc:
+        violations.append(
+            f"[FAIL-SECURELY] Unable to read OPSEC_LOCAL_BLOCKLIST ({path}): {exc}"
+        )
+        return patterns
+
+    for lineno, raw_line in enumerate(raw_lines, start=1):
         line = raw_line.strip()
         if not line or line.startswith("#"):
             continue
-        patterns.append((re.compile(line, re.IGNORECASE), "Local private/NDA blocklist match"))
+        try:
+            patterns.append(
+                (re.compile(line, re.IGNORECASE), "Local private/NDA blocklist match")
+            )
+        except re.error as exc:
+            violations.append(
+                f"[FAIL-SECURELY] Invalid regex in OPSEC_LOCAL_BLOCKLIST line {lineno}: {exc}"
+            )
     return patterns
 
 
@@ -169,7 +191,7 @@ def scan_staged_files(
 
 def main() -> int:
     violations: list[str] = []
-    local_patterns = load_local_blocklist()
+    local_patterns = load_local_blocklist(violations)
     check_author_email(violations)
     file_count = scan_staged_files(violations, local_patterns)
 
